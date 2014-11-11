@@ -1,0 +1,8 @@
+<launch>
+
+  <include file="$(find tortugabot_bringup)/launch/base.launch"/>
+  <include file="$(find tortugabot_bringup)/launch/3dsensor.launch"/>
+  <node name="kinect_on_plate" pkg="tf" type="static_transform_publisher"
+        args="0 0 0.2 0 0 0 1 base_footprint camera_link 200"/>
+
+</launch>

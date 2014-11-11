@@ -1,0 +1,19 @@
+<package>
+  <description brief="roboclaw_driver">
+
+     Driver for the RoboClaw motor controllers
+
+  </description>
+  <author>Ricardo Garro</author>
+  <author>Alexis Maldonado</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <depend package="std_msgs"/>
+  <depend package="cereal_port"/>
+  <depend package="rospy"/>
+  <depend package="roscpp"/>
+  <depend package="tf"/>
+ <depend package="nav_msgs"/>
+</package>
+
+
