@@ -1,0 +1,14 @@
+<package format="2">
+  <name>cereal_port</name>
+  <version>0.0.2</version>
+  <description>Simple C++ serial port class for ROS.</description>
+  <author>Gonçalo Cabrita and Pedro Sousa</author>
+  <maintainer email="amaldo@cs.uni-bremen.de">Alexis Maldonado</maintainer>
+  <license>BSD</license>
+  <url>http://ros.org/wiki/cereal_port</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>roscpp</depend>
+</package>
+
+
