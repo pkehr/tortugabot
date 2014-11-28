@@ -7,7 +7,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 catkin_package(
  INCLUDE_DIRS include
-#  LIBRARIES lib
+ LIBRARIES cereal_port
  CATKIN_DEPENDS roscpp
 #  DEPENDS system_lib
 )
