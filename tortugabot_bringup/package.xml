@@ -1,0 +1,12 @@
+<package format="2">
+  <name>tortugabot_bringup</name>
+  <version>0.0.0</version>
+  <description>Launch files for starting the tortugabot </description>
+  <author>Alexis Maldonado</author>
+  <maintainer email="amaldo@cs.uni-bremen.de">Alexis Maldonado</maintainer>
+  <license>GPLv3+</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+</package>
+
+
