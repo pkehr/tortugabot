@@ -15,3 +15,8 @@ If you never used `wstool` in your workspace before, you need to initialize the 
 ```bash
 $ wstool init
 ```
+
+You will additionally need the following system dependencies:
+```bash
+$ sudo apt-get install ros-DISTRO-joy ros-DISTRO-openni2-camera ros-DISTRO-openni2-launch
+```
