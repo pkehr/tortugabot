@@ -40,6 +40,9 @@
 
 #define REPLY_SIZE 32
 
+//These will contain -1 if the sign should be inverted
+int left_motor_sign_  =1;
+int right_motor_sign_ =1;
 
 
 cereal::CerealPort device;
@@ -48,16 +51,18 @@ const float cereal_timeout=0.1;
 
 
 //Variables that describe physical details of the robot
-//FIXME: these should be parameters
-const float tortugabot_wheel_diameter = 0.097;  // 10cm wheel is really about 97mm
-const float tortugabot_wheel_to_wheel_distance = 0.339;  //from the center of one wheel to the other, in meters
+//These values get overriden by parameters in main()
+double tortugabot_wheel_diameter = 0.125;  // 10cm wheel is really about 97mm
+double tortugabot_wheel_to_wheel_distance = 0.357;  //from the center of one wheel to the other, in meters
 //Devantech EMG49 has 980 encoder ticks per shaft turn
 //Devantech EMG30 has 360 encoder ticks per shaft turn
-const int tortugabot_ticks_per_turn = 360;
-const int tortugabot_pps_max = 1250; //maximum number of ticks/s when running with duty cycle of 100%
+int tortugabot_ticks_per_turn = 980;
+int tortugabot_pps_max = 2300; //maximum number of ticks/s when running with duty cycle of 100%
+int tortugabot_pid_p = 65000;
+int tortugabot_pid_i = 32768;
+int tortugabot_pid_d = 16384;
 
-//FIXME: Should be a parameter
-const unsigned char ROBOCLAW_ADDRESS = 128;
+unsigned char g_roboclaw_address = 128;
 
 const double PI = 3.141592;
 
@@ -96,7 +101,7 @@ int clamp_value(int input, int limit)
 //Function for sending simple commands that don't need a checksum
 void write_to_roboclaw_2(unsigned char command)
 {
-    unsigned char address = ROBOCLAW_ADDRESS;
+    unsigned char address = g_roboclaw_address;
 
     unsigned char cmd[2];
 
@@ -110,7 +115,7 @@ void write_to_roboclaw_2(unsigned char command)
 //Function for sending simple commands with one-byte parameter
 void write_to_roboclaw(unsigned char command, unsigned char bytevalue)
 {
-    unsigned char address = ROBOCLAW_ADDRESS;
+    unsigned char address = g_roboclaw_address;
     unsigned char checksum = (address + command + bytevalue) & 0x7F;
 
     unsigned char cmd[4];
@@ -181,7 +186,7 @@ int Read_Quadrature_M(int motor)
 
         }
 
-        checksum_from_roboclaw = (ROBOCLAW_ADDRESS + command + ((unsigned char)(reply[0])) + ((unsigned char)(reply[1])) + ((unsigned char)(reply[2])) + ((unsigned char)(reply[3])) + ((unsigned char)(reply[4])) ) & 0x7F;
+        checksum_from_roboclaw = (g_roboclaw_address + command + ((unsigned char)(reply[0])) + ((unsigned char)(reply[1])) + ((unsigned char)(reply[2])) + ((unsigned char)(reply[3])) + ((unsigned char)(reply[4])) ) & 0x7F;
 
 
         if (checksum_from_roboclaw == (unsigned char)(reply[5])) {
@@ -365,7 +370,7 @@ void Signed_Duty_Motors(int dutycycle1, int dutycycle2)
     unsigned char address;
     unsigned char command;
 
-    address = ROBOCLAW_ADDRESS;
+    address = g_roboclaw_address;
 
     command = 34; //Drive M1/M2 with signed duty cycle
 
@@ -401,7 +406,7 @@ void Signed_Speed_M(int motor,int vel)
     unsigned char address;
     unsigned char command;
 
-    address = ROBOCLAW_ADDRESS;
+    address = g_roboclaw_address;
 
     if (motor == 1) {
         command = 35;
@@ -449,7 +454,7 @@ void SignedSpeed_MIX(int QspeedM1,int QspeedM2)
     unsigned char address;
     unsigned char command;
 
-    address = ROBOCLAW_ADDRESS;
+    address = g_roboclaw_address;
     command = 37;
 
 
@@ -494,7 +499,7 @@ void set_QPID1(int motor)
 
     int Q, P, I, D;
 
-    unsigned char address = ROBOCLAW_ADDRESS;
+    unsigned char address = g_roboclaw_address;
     unsigned char command;
 
     if (motor == 1)
@@ -506,11 +511,10 @@ void set_QPID1(int motor)
         command = 29;
     }
 
-    //FIXME: Make these parameters
-    Q = tortugabot_pps_max;
-    P = 20000;  //had 10k
-    I = 32768; // 32768
-    D = 16384; //16384
+    Q = tortugabot_pps_max; //to get this value, get the motors to run with 100% duty cycle, and look at the counts per seconds
+    P = tortugabot_pid_p;  //default: 65536
+    I = tortugabot_pid_i; //          32768
+    D = tortugabot_pid_d; //          16384
 
     unsigned char *Qs_x;
     Qs_x = reinterpret_cast<unsigned char *>(&Q);
@@ -599,8 +603,8 @@ void cmdVelReceived(const geometry_msgs::Twist::ConstPtr& cmd_vel)
     VL = 2 * vel_lin_esc - VR; //2v-VR=VL
 
     //VR_ticks and VL_ticks in ticks/s
-    VR_ticks = VR * ticks_per_meter;
-    VL_ticks = VL * ticks_per_meter;
+    VR_ticks = left_motor_sign_ * VR * ticks_per_meter;
+    VL_ticks = right_motor_sign_ * VL * ticks_per_meter;
 
     //printf("VR_t = %f  VL_t = %f \n", VR_ticks, VL_ticks);
 
@@ -655,27 +659,102 @@ void find_max_qpps_experiment(){
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, "roboclaw_controller");
-    ROS_INFO("Roboclaw controller coming up");
+    ROS_INFO("RoboClaw controller coming up");
 
     ros::NodeHandle n("~");
 
+    std::string serial_port_;
+    int baudrate_, roboclaw_address_;
+    bool invert_left_motor_sign_;
+    bool invert_right_motor_sign_;
 
-    //FIXME: Make the port a ROS parameter
-    // Change the next line according to your port name and baud rate
-    //try{ device.open("/dev/ttyUSB0", 38400); }
-    try{ device.open("/dev/ttyACM0", 1000000); }  // USB devices connect at 1Mbps
-    catch(cereal::Exception& e)
-    {
-        ROS_FATAL("Failed to open the serial port!!!");
-        ROS_BREAK();
-        return(-1);
+    double wheel_diameter, wheel_to_wheel_distance;
+    int ticks_per_turn, pps_max, pid_p, pid_i, pid_d;
+
+    std::string odom_frame_;
+    std::string base_footprint_frame_;
+
+
+    n.param<std::string>("serial_port", serial_port_, "/dev/ttyACM0");
+    n.param<int>("baudrate", baudrate_, 1000000);
+    n.param<int>("roboclaw_address", roboclaw_address_, 128);
+
+    n.param<std::string>("odom_frame", odom_frame_, "odom");
+    n.param<std::string>("base_footprint_frame", base_footprint_frame_, "base_footprint");
+
+
+    n.param<bool>("invert_left_motor_sign", invert_left_motor_sign_, false);
+    n.param<bool>("invert_right_motor_sign", invert_right_motor_sign_, false);
+
+    if (invert_left_motor_sign_) {
+      ROS_INFO("Inverting left motor sign");
+      left_motor_sign_ = -1;
     }
-    ROS_INFO("The serial port is opened at %d bps.", device.baudRate());
+
+    if (invert_right_motor_sign_) {
+      ROS_INFO("Inverting right motor sign");
+      right_motor_sign_ = -1;
+    }
+
+    n.param<double>("wheel_diameter", wheel_diameter, 0.125);
+    n.param<double>("wheel_to_wheel_distance", wheel_to_wheel_distance, 0.357);
+    n.param<int>("ticks_per_turn", ticks_per_turn, 980); //EMG49 -> 980  EMG30 -> 360
+    n.param<int>("pps_max", pps_max, 2300);  //aximum number of ticks/s when running with duty cycle of 100%
+    n.param<int>("pid_p", pid_p, 65000);
+    n.param<int>("pid_i", pid_i, 32768);
+    n.param<int>("pid_d", pid_d, 16384);
+
+    //setting the global variables with the parmeter values
+    g_roboclaw_address = roboclaw_address_;
+    tortugabot_wheel_diameter = wheel_diameter;
+    tortugabot_wheel_to_wheel_distance = wheel_to_wheel_distance;
+    tortugabot_ticks_per_turn = ticks_per_turn;
+    tortugabot_pps_max = pps_max;
+    tortugabot_pid_p = pid_p;
+    tortugabot_pid_i = pid_i;
+    tortugabot_pid_d = pid_d;
+
+
+    ROS_INFO("Configuration: wheel_diam=%5.3fm wheel_to_wheel_d=%5.3fm ticks_per_turn=%d", wheel_diameter, wheel_to_wheel_distance, ticks_per_turn);
+    ROS_INFO("               pps_max=%d pid_p=%d pid_i=%d pid_d=%d", pps_max, pid_p, pid_i, pid_d);
+
+
+
+    //We have all the info. Now let us start up
+
+    //Get the serial port going
+    int retry_counter = 0;
+    int max_retries = 60;
+    bool worked = false;
+
+    while (retry_counter < max_retries) {
+      try { 
+        device.open(serial_port_.c_str(), baudrate_);
+        retry_counter = max_retries;
+        worked = true;
+      }  // USB devices connect at 1Mbps
+      catch(cereal::Exception& e)
+      {
+          retry_counter += 1;
+          ROS_WARN("Could not open the serial port (%s). Will retry in 2s. Retry #%d/%d", serial_port_.c_str(), retry_counter, max_retries);
+          ros::Duration(2.0).sleep();
+      }
+
+    }
+
+    if (!worked) {
+      ROS_FATAL("Giving up on opening the serial port. Exiting.");
+      ROS_BREAK();
+      return(-1);
+    }
+
+ 
+    ROS_INFO("The serial port (%s) is opened at %d bps.", serial_port_.c_str(), device.baudRate());
 
     //Starting fresh, just in case
     device.flush();
 
-    ros::Subscriber cmd_vel_sub  = n.subscribe<geometry_msgs::Twist>("/cmd_vel", 1, cmdVelReceived);
+    ros::Subscriber cmd_vel_sub  = n.subscribe<geometry_msgs::Twist>("/cmd_vel", 3, cmdVelReceived);
 
 
     //Initialize the roboclaw
@@ -740,8 +819,8 @@ int main(int argc, char** argv)
         //compute odometry in a typical way given the velocities of the robot
         double dt = (current_time - last_time).toSec();
 
-        count_RR = Read_Quadrature_M(1);
-        count_RL = Read_Quadrature_M(2);
+        count_RR = right_motor_sign_ * Read_Quadrature_M(1);
+        count_RL = left_motor_sign_  * Read_Quadrature_M(2);
 
         rightCounts = count_RR;
         leftCounts = count_RL;
@@ -767,7 +846,7 @@ int main(int argc, char** argv)
 
 
         vx = deltaX / dt;
-        vx = deltaY / dt;
+        vy = deltaY / dt;
         vth = deltaHeading / dt;
 
 
@@ -783,12 +862,12 @@ int main(int argc, char** argv)
         //first, we'll publish the transform over tf
         geometry_msgs::TransformStamped odom_trans;
         odom_trans.header.stamp = current_time;
-        //FIXME: These should be parameters
-        odom_trans.header.frame_id = "odom";
-        odom_trans.child_frame_id = "base_footprint";
+
+        odom_trans.header.frame_id = odom_frame_.c_str();
+        odom_trans.child_frame_id = base_footprint_frame_.c_str();
 
         odom_trans.transform.translation.x = mX;
-        odom_trans.transform.translation.y = mY;
+        odom_trans.transform.translation.y = mY; 
         odom_trans.transform.translation.z = 0.0; //robot stuck on the floor :)
         odom_trans.transform.rotation = odom_quat;
 
@@ -800,16 +879,17 @@ int main(int argc, char** argv)
         odom.header.stamp = current_time;
         odom.header.frame_id = "odom";
 
-        //set the position
+        //set the position (in the odom frame of reference)
         odom.pose.pose.position.x = mX;//x;
         odom.pose.pose.position.y = mY;//y;
         odom.pose.pose.position.z = 0.0;
         odom.pose.pose.orientation = odom_quat;
 
         //set the velocity
-        odom.child_frame_id = "base_footprint";
-        odom.twist.twist.linear.x = vx;
-        odom.twist.twist.linear.y = vy;
+        odom.child_frame_id = base_footprint_frame_.c_str();
+        //the twist in the odom message is in the reference frame of the child_frame_id
+        odom.twist.twist.linear.x = deltaDistance / dt;
+        odom.twist.twist.linear.y = 0.0;
         odom.twist.twist.angular.z = vth;
 
         //publish the message

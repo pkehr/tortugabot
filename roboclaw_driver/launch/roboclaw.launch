@@ -1,19 +1,55 @@
 <launch>
 
+  <arg name="tortugabot1" default="false"/>
+  <arg name="tortugabot2" default="true"/>
 
 
-  <!--- Teleop Joystick -->
-<!--  <node pkg="turtlebot_teleop" type="turtlebot_teleop_joy" name="turtlebot_teleop_joystick"> -->
-<!--    <param name="scale_angular" value="1.5"/> -->
-<!--    <param name="scale_linear" value="0.5"/> -->
-<!-- 
-  <param name="scale_angular" value="1.5"/>
-  <param name="scale_linear" value="0.5"/>
-  </node>
+  <group if="$(arg tortugabot1)">
+      <node pkg="roboclaw_driver" type="roboclaw_driver" name="tortugabot_roboclaw" output="screen">
+          <param name="serial_port" value="/dev/ttyACM0"/>
+          <param name="baudrate" value="1000000"/>
+          <param name="roboclaw_address" value="128"/>
+    
+          <param name="odom_frame" value="odom"/>
+          <param name="base_footprint_frame" value="base_footprint"/>
+    
+          <param name="invert_left_motor_sign" value="false"/>
+          <param name="invert_right_motor_sign" value="false"/>
+      
+          <param name="wheel_diameter" value="0.097"/>
+          <param name="wheel_to_wheel_distance" value="0.339"/>
+          <param name="ticks_per_turn" value="360"/>
+          <param name="pps_max" value="1250"/>
+          <param name="pid_p" value="65000"/>
+          <param name="pid_i" value="32768"/>
+          <param name="pid_d" value="16384"/>
+      </node>
+  </group>
 
-  <node pkg="joy" type="joy_node" name="joystick"/>
- -->
 
-  <node pkg="roboclaw_driver" type="roboclaw_driver" name="tortugabot_roboclaw" output="screen">
-   </node>
+
+  <group if="$(arg tortugabot2)">
+      <node pkg="roboclaw_driver" type="roboclaw_driver" name="tortugabot_roboclaw" output="screen">
+          <param name="serial_port" value="/dev/ttyACM0"/>
+          <param name="baudrate" value="1000000"/>
+          <param name="roboclaw_address" value="128"/>
+    
+          <param name="odom_frame" value="odom"/>
+          <param name="base_footprint_frame" value="base_footprint"/>
+
+          <param name="invert_left_motor_sign" value="true"/>
+          <param name="invert_right_motor_sign" value="true"/>
+    
+          <param name="wheel_diameter" value="0.125"/>
+          <param name="wheel_to_wheel_distance" value="0.357"/>
+          <param name="ticks_per_turn" value="980"/>
+          <param name="pps_max" value="2300"/>
+          <param name="pid_p" value="65000"/>
+          <param name="pid_i" value="32768"/>
+          <param name="pid_d" value="16384"/>
+
+      </node>
+  </group>
+
+
 </launch>
