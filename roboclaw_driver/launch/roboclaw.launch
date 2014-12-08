@@ -44,8 +44,8 @@
           <param name="wheel_to_wheel_distance" value="0.357"/>
           <param name="ticks_per_turn" value="980"/>
           <param name="pps_max" value="2300"/>
-          <param name="pid_p" value="300.0"/>
-          <param name="pid_i" value="30.0"/>
+          <param name="pid_p" value="50.0"/>
+          <param name="pid_i" value="10.0"/>
           <param name="pid_d" value="5.0"/>
 
       </node>
