@@ -58,9 +58,9 @@ double tortugabot_wheel_to_wheel_distance = 0.357;  //from the center of one whe
 //Devantech EMG30 has 360 encoder ticks per shaft turn
 int tortugabot_ticks_per_turn = 980;
 int tortugabot_pps_max = 2300; //maximum number of ticks/s when running with duty cycle of 100%
-int tortugabot_pid_p = 65000;
-int tortugabot_pid_i = 32768;
-int tortugabot_pid_d = 16384;
+double tortugabot_pid_p = 1.0;
+double tortugabot_pid_i = 0.5;
+double tortugabot_pid_d = 0.25;
 
 unsigned char g_roboclaw_address = 128;
 
@@ -70,6 +70,13 @@ ros::Time last_cmd_received;
 ros::Duration half_seconds(0.2);
 
 
+
+typedef struct qpid_s_tag {
+  int qpps;
+  double p;
+  double i;
+  double d;
+} qpid_s;
 
 //Get the checksum as calculated in the RoboClaw manual
 unsigned char get_checksum(unsigned char *data, unsigned int length){
@@ -146,6 +153,20 @@ void set_vel(int motor, int vel)
     }
 
     write_to_roboclaw(command, vel);
+}
+
+void set_encoder_mode(int motor, unsigned char mode)
+{
+        unsigned char command;
+
+    if (motor == 1) {
+        command = 92;
+    } else {
+        command = 93;
+    }
+
+    write_to_roboclaw(command, mode);
+
 }
 
 
@@ -490,6 +511,83 @@ void SignedSpeed_MIX(int QspeedM1,int QspeedM2)
 
 
 
+qpid_s read_qpid(int motor)
+{
+    qpid_s data;
+
+    unsigned char address = g_roboclaw_address;
+    unsigned char command;
+
+    if (motor == 1)
+    {
+        command = 55;
+    }
+    else
+    {
+        command = 56;
+    }
+   
+    unsigned char cmd[2];
+    char reply[20];
+
+    cmd[0] = address;
+    cmd[1] = command;
+
+    device.write((const char*)&cmd, 2);
+
+
+    try{ device.read(reply, 17, cereal_timeout); }
+    catch(cereal::TimeoutException& e)
+    {
+
+        ROS_ERROR("Timeout!");
+    }
+
+
+    //FIXME: Verify checksum of read data
+
+    int data_q, data_p, data_i, data_d;
+
+    unsigned char *data_q_x, *data_p_x, *data_i_x, *data_d_x;
+
+    data_q_x = reinterpret_cast<unsigned char *>(&data_q);
+    data_p_x = reinterpret_cast<unsigned char *>(&data_p);
+    data_i_x = reinterpret_cast<unsigned char *>(&data_i);
+    data_d_x = reinterpret_cast<unsigned char *>(&data_d);
+
+    data_p_x[0] = reply[3];
+    data_p_x[1] = reply[2];
+    data_p_x[2] = reply[1];
+    data_p_x[3] = reply[0];
+
+    data_i_x[0] = reply[7];
+    data_i_x[1] = reply[6];
+    data_i_x[2] = reply[5];
+    data_i_x[3] = reply[4];
+
+    data_d_x[0] = reply[11];
+    data_d_x[1] = reply[10];
+    data_d_x[2] = reply[9];
+    data_d_x[3] = reply[8];
+
+    data_q_x[0] = reply[15];
+    data_q_x[1] = reply[14];
+    data_q_x[2] = reply[13];
+    data_q_x[3] = reply[12];
+
+
+
+    double float_to_pid = 65536.0;
+    data.qpps = data_q;
+    data.p = data_p / float_to_pid;
+    data.i = data_i / float_to_pid;
+    data.d = data_d / float_to_pid;
+
+
+    return(data);
+ 
+
+}
 
 void set_QPID1(int motor)
 {
@@ -511,10 +609,12 @@ void set_QPID1(int motor)
         command = 29;
     }
 
+    //The PID values are divided by 65536
+    double pid_to_float = 65536.0;
     Q = tortugabot_pps_max; //to get this value, get the motors to run with 100% duty cycle, and look at the counts per seconds
-    P = tortugabot_pid_p;  //default: 65536
-    I = tortugabot_pid_i; //          32768
-    D = tortugabot_pid_d; //          16384
+    P = tortugabot_pid_p * pid_to_float;  //default: 65536
+    I = tortugabot_pid_i * pid_to_float; //          32768
+    D = tortugabot_pid_d * pid_to_float; //          16384
 
     unsigned char *Qs_x;
     Qs_x = reinterpret_cast<unsigned char *>(&Q);
@@ -669,7 +769,8 @@ int main(int argc, char** argv)
     bool invert_right_motor_sign_;
 
     double wheel_diameter, wheel_to_wheel_distance;
-    int ticks_per_turn, pps_max, pid_p, pid_i, pid_d;
+    int ticks_per_turn, pps_max;
+    double pid_p, pid_i, pid_d;
 
     std::string odom_frame_;
     std::string base_footprint_frame_;
@@ -700,9 +801,9 @@ int main(int argc, char** argv)
     n.param<double>("wheel_to_wheel_distance", wheel_to_wheel_distance, 0.357);
     n.param<int>("ticks_per_turn", ticks_per_turn, 980); //EMG49 -> 980  EMG30 -> 360
     n.param<int>("pps_max", pps_max, 2300);  //aximum number of ticks/s when running with duty cycle of 100%
-    n.param<int>("pid_p", pid_p, 65000);
-    n.param<int>("pid_i", pid_i, 32768);
-    n.param<int>("pid_d", pid_d, 16384);
+    n.param<double>("pid_p", pid_p, 1.0);
+    n.param<double>("pid_i", pid_i, 0.5);
+    n.param<double>("pid_d", pid_d, 0.25);
 
     //setting the global variables with the parmeter values
     g_roboclaw_address = roboclaw_address_;
@@ -716,7 +817,7 @@ int main(int argc, char** argv)
 
 
     ROS_INFO("Configuration: wheel_diam=%5.3fm wheel_to_wheel_d=%5.3fm ticks_per_turn=%d", wheel_diameter, wheel_to_wheel_distance, ticks_per_turn);
-    ROS_INFO("               pps_max=%d pid_p=%d pid_i=%d pid_d=%d", pps_max, pid_p, pid_i, pid_d);
+    ROS_INFO("               pps_max=%d pid_p=%f pid_i=%f pid_d=%f", pps_max, pid_p, pid_i, pid_d);
 
 
 
@@ -759,10 +860,21 @@ int main(int argc, char** argv)
 
     //Initialize the roboclaw
     reset_counts();
+
+    //encoder mode -> bit 0 => 0 for quadrature encoders, 1 for absolute encoders
+    set_encoder_mode(1, 0);
+    set_encoder_mode(2, 0);
+
+
+    //set and read PID values
     set_QPID1(1);
     set_QPID1(2);
+    qpid_s right_qpid = read_qpid(1);
+    qpid_s left_qpid = read_qpid(2);
 
-    //FIXME: Check that the PID values got applied
+    ROS_INFO("PID Right Motor: qpps=%d p=%f i=%f d=%f", right_qpid.qpps, right_qpid.p, right_qpid.i, right_qpid.d);
+    ROS_INFO("PID Left  Motor: qpps=%d p=%f i=%f d=%f", left_qpid.qpps, left_qpid.p, left_qpid.i, left_qpid.d);
+
 
     ros::Publisher odom_pub = n.advertise<nav_msgs::Odometry>("odom", 50);
     tf::TransformBroadcaster odom_broadcaster;

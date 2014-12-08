@@ -1,7 +1,7 @@
 <launch>
 
-  <arg name="tortugabot1" default="false"/>
-  <arg name="tortugabot2" default="true"/>
+  <arg name="tortugabot1" default="true"/>
+  <arg name="tortugabot2" default="false"/>
 
 
   <group if="$(arg tortugabot1)">
@@ -20,9 +20,9 @@
           <param name="wheel_to_wheel_distance" value="0.339"/>
           <param name="ticks_per_turn" value="360"/>
           <param name="pps_max" value="1250"/>
-          <param name="pid_p" value="65000"/>
-          <param name="pid_i" value="32768"/>
-          <param name="pid_d" value="16384"/>
+          <param name="pid_p" value="300.0"/>
+          <param name="pid_i" value="30.0"/>
+          <param name="pid_d" value="5.0"/>
       </node>
   </group>
 
@@ -44,9 +44,9 @@
           <param name="wheel_to_wheel_distance" value="0.357"/>
           <param name="ticks_per_turn" value="980"/>
           <param name="pps_max" value="2300"/>
-          <param name="pid_p" value="65000"/>
-          <param name="pid_i" value="32768"/>
-          <param name="pid_d" value="16384"/>
+          <param name="pid_p" value="300.0"/>
+          <param name="pid_i" value="30.0"/>
+          <param name="pid_d" value="5.0"/>
 
       </node>
   </group>
