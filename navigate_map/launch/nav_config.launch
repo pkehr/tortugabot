@@ -1,0 +1,28 @@
+<launch>
+  <include file="$(find tortugabot_bringup)/launch/3dsensor.launch">
+    <arg name="rgb_processing" value="false" />
+    <arg name="depth_registration" value="false" />
+    <arg name="depth_processing" value="false" />
+    <arg name="scan_topic" value="/scan" />
+  </include>
+  <node name="kinect_on_plate" pkg="tf" type="static_transform_publisher"
+        args="0 0 0.2 0 0 0 1 base_footprint camera_link 200"/>
+
+  <include file="$(find tortugabot_bringup)/launch/base_and_joy.launch"/>
+
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find navigate_map)/maps/map_1.pgm 0.05"/>
+
+  <include file="$(find turtlebot_navigation)/launch/includes/amcl.launch.xml">
+    <arg name="initial_pose_x" value="10"/>
+    <arg name="initial_pose_y" value="10"/>
+    <arg name="initial_pose_a" value="1"/>
+  </include>
+
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <rosparam file="$(find navigate_map)/launch/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find navigate_map)/launch/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find navigate_map)/launch/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find navigate_map)/launch/global_costmap_params.yaml" command="load" />
+    <rosparam file="$(find navigate_map)/launch/base_local_planner_params.yaml" command="load" />
+  </node>
+</launch>
