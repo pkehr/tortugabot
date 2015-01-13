@@ -1,0 +1,7 @@
+%YAML:1.0
+ar_map_boards:
+   - { name:"/board1", type:"floating" }
+   - { name:"/board2", type:"floating" }
+   - { name:"/board3", type:"floating" }
+ar_map_cameras:
+   - { name:"/camera_rgb_optical_frame", type:"floating" }
