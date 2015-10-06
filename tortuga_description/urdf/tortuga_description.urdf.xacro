@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="tortuga_description">
+  <xacro:include filename="$(find tortuga_description)/urdf/tortuga_base.xacro"/>
+  <xacro:include filename="$(find tortuga_description)/urdf/tortuga_motors.xacro"/>
+  <xacro:include filename="$(find tortuga_description)/urdf/tortuga_wheels.xacro"/>
+  <xacro:include filename="$(find tortuga_description)/urdf/tortuga_sensors.xacro"/>
+<!--
+-->
+
+  <xacro:property name="PI" value="3.141592654" />
+  <link name="base_footprint"/>
+
+  <tortuga_base_macro name="base" parent="base_footprint"/>
+
+  <tortuga_motor_macro parent="base_left_motor_out" name="left_motor">
+      <axis xyz="0 0 -1"/>
+  </tortuga_motor_macro>
+  <tortuga_motor_macro parent="base_right_motor_out" name="right_motor">
+      <axis xyz="0 0 1"/>
+  </tortuga_motor_macro>
+  
+  <tortuga_wheel_macro parent="left_motor_out" name="left_wheel"/>
+  <tortuga_wheel_macro parent="right_motor_out" name="right_wheel"/>
+  
+  <tortuga_xtion_macro name="xtion_cam" parent="base_link">
+      <origin xyz="0.02 0.0 -0.0418" rpy="0.0 0.0 0.0"/>      
+  </tortuga_xtion_macro>
+  <tortuga_back_wheel_macro parent="base_back_wheel_out" name="back_wheel"/>
+
+</robot>

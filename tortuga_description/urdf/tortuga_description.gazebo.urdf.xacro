@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="tortuga_description">
+  <xacro:include filename="$(find tortuga_description)/urdf/tortuga_description.urdf.xacro"/>
+  <xacro:include filename="$(find tortuga_description)/urdf/tortuga_gazebo.xacro"/>
+
+  <tortuga_motion/>
+  <tortuga_xtion_plugin camera_name="camera"/>
+</robot>

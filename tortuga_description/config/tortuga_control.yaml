@@ -1,0 +1,23 @@
+joint_state_controller:
+    type: joint_state_controller/JointStateController
+    publish_rate: 200
+    
+right_wheel_controller:
+    type: effort_controllers/JointPositionController
+    joint: right_motor_out_joint
+    pid: {p: 100.0, i: 0.01, d: 10.0}
+left_wheel_controller:
+    type: effort_controllers/JointPositionController
+    joint: left_motor_out_joint
+    pid: {p: 100.0, i: 0.01, d: 10.0}
+    
+    
+    
+back_wheel_hinge_controller:
+    type: effort_controllers/JointPositionController
+    joint: back_wheel_hinge_joint
+    pid: {p: 100.0, i: 0.01, d: 10.0}
+back_wheel_controller:
+    type: effort_controllers/JointPositionController
+    joint: back_wheel_wheel_joint
+    pid: {p: 100.0, i: 0.01, d: 10.0}
