@@ -10,10 +10,10 @@
   <buildtool_depend>catkin</buildtool_depend>
   <depend>std_msgs</depend>
   <depend>cereal_port</depend>
-  <depend>rospy</depend>
   <depend>roscpp</depend>
   <depend>tf</depend>
   <depend>nav_msgs</depend>
+  <depend>geometry_msgs</depend>
 </package>
 
 

@@ -6,14 +6,12 @@ find_package(catkin REQUIRED COMPONENTS
   cereal_port
   nav_msgs
   std_msgs
+  geometry_msgs
   tf
 )
 
 catkin_package(
-# INCLUDE_DIRS include
-#  LIBRARIES lib
- CATKIN_DEPENDS roscpp cereal_port nav_msgs std_msgs tf
-#  DEPENDS system_lib
+  CATKIN_DEPENDS roscpp cereal_port nav_msgs std_msgs geometry_msgs tf
 )
 
 include_directories(

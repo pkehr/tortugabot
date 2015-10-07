@@ -7,6 +7,22 @@
   <license>GPLv3+</license>
 
   <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- 3dsensor.launch -->
+  <depend>openni2_launch</depend>
+  <depend>nodelet</depend>
+
+  <!-- ekf.launch -->
+  <depend>robot_pose_ekf</depend>
+
+  <!-- joy_teleop.launch -->
+  <depend>joy</depend>
+
+  <!-- {joy,keyboard}_teleop.launch -->
+  <depend>turtlebot_teleop</depend>
+
+  <!-- minimal.launch -->
+  <depend>tf</depend>
 </package>
 
 
