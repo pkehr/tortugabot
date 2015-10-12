@@ -54,5 +54,5 @@
     <remap from="scan"                      to="$(arg scan_topic)"/>
   </node>
 
-  <!-- <include file="$(find navigate_map)/launch/move_base.launch" /> -->
+  <!-- <include file="$(find navigate_map)/launch/move_base_laser.launch" /> -->
 </launch>
