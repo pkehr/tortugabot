@@ -136,6 +136,14 @@ void write_to_roboclaw(unsigned char command, unsigned char bytevalue)
 
 }
 
+// Setting S3 as emergency stop
+void set_emergency_stop()
+{
+
+    write_to_roboclaw(74, 2); // 74 is setting S3 mode, 2 is mode e-stop
+
+}
+
 
 void set_vel(int motor, int vel)
 {
@@ -864,6 +872,9 @@ int main(int argc, char** argv)
     //encoder mode -> bit 0 => 0 for quadrature encoders, 1 for absolute encoders
     set_encoder_mode(1, 0);
     set_encoder_mode(2, 0);
+
+    // Activate E-Stop (S3)
+    set_emergency_stop();
 
 
     //set and read PID values
