@@ -11,8 +11,9 @@
   <arg name="Y" default="0"/>
   <arg name="name" default="tortuga"/>
   <arg name="robot_namespace" default=""/>
-    
+<!--    
   <arg name="joy_dev" default="/dev/input/js0" />
+-->
   <arg name="urdf-name" default="tortuga_description.gazebo.urdf.xacro"/>
   <arg name="urdf-path" value="$(find tortuga_description)/urdf/$(arg urdf-name)"/>
   <include file="$(find tortuga_description)/launch/upload_tortuga.launch">
@@ -36,17 +37,19 @@
      <param name="publish_frequency" type="double" value="50.0" />
      <param name="tf_prefix" type="string" value="$(arg robot_namespace)" />
    </node>
-   
+<!--   
      <node name="joy" pkg="joy" type="joy_node" output="screen" >
     <param name="dev" value="$(arg joy_dev)" />
   </node>
-
+-->
   <!-- Note that axis IDs are those from the joystick message plus one, to be able to invert axes by specifiying either positive or negative axis numbers.-->
   <!-- Axis 2 from joy message thus has to be set as '3' or '-3'(inverted mode) below-->
+<!--
   <node name="tortuga_teleop" pkg="hector_quadrotor_teleop" type="quadrotor_teleop">
     <param name="x_axis" value="2"/>
     <param name="y_axis" value="4"/>
     <param name="z_axis" value="5"/>
     <param name="yaw_axis" value="1"/>
   </node>
+-->
 </launch>
