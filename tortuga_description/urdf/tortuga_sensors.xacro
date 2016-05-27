@@ -74,6 +74,7 @@
       <child link="${name}"/>
     </joint>
     <link name="${name}">
+        <!--
         <collision>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
@@ -83,11 +84,12 @@
 
         <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
+        
         <geometry>
-            <box size="0.05 0.05 0.05" /> <!-- does not need to match collision -->
+            <box size="0.05 0.05 0.05" />
         </geometry>
         </visual>
-
+        -->
         <inertial>
         <mass value="1e-5" />
         <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -98,7 +100,7 @@
       <gazebo reference="${name}">
     <sensor type="gpu_ray" name="head_${name}_sensor">
       <pose>0 0 0 0 0 0</pose>
-      <visualize>false</visualize>
+      <visualize>true</visualize>
       <update_rate>40</update_rate>
       <ray>
         <scan>
@@ -110,8 +112,8 @@
           </horizontal>
         </scan>
         <range>
-          <min>0.10</min>
-          <max>30.0</max>
+          <min>0.5</min>
+          <max>3.0</max>
           <resolution>0.01</resolution>
         </range>
         <noise>
