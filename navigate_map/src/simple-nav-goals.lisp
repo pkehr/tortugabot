@@ -28,7 +28,7 @@
 
   (multiple-value-bind (result status)
       (let ((actionlib:*action-server-timeout* 10.0)
-            (the-goal (cl-tf:pose-stamped->msg 
+            (the-goal (cl-tf:to-msg 
                        (cl-tf:make-pose-stamped
                         frame-id
                         (roslisp::ros-time)
