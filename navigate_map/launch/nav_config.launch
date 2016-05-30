@@ -10,11 +10,11 @@
 
   <include file="$(find tortugabot_bringup)/launch/base_and_joy.launch"/>
 
-  <node name="map_server" pkg="map_server" type="map_server" args="$(find navigate_map)/maps/finalmap1.pgm 0.05"/>
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find navigate_map)/maps/good_map_edit.pgm 0.05"/>
 
   <include file="$(find turtlebot_navigation)/launch/includes/amcl.launch.xml">
     <arg name="initial_pose_x" value="41"/>
-    <arg name="initial_pose_y" value="38"/>
+    <arg name="initial_pose_y" value="41"/>
     <arg name="initial_pose_a" value="1"/>
   </include>
 
