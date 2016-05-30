@@ -8,6 +8,7 @@ The easiest way to install everything, including the code in this repository, is
 ```bash
 $ wstool merge https://raw.githubusercontent.com/code-iai/tortugabot/master/rosinstall.yaml
 $ wstool update
+$ cd .. && rosdep install --from-paths src --ignore-src
 ```
 
 If you never used `wstool` in your workspace before, you need to initialize the workspace first:
