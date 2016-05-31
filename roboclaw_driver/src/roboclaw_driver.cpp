@@ -89,7 +89,7 @@ uint16_t get_checksum(unsigned char *packet, unsigned int nBytes){
     // Perform modulo-2 division, a bit at a time.
     for (unsigned char bit = 0; bit < 8; bit++) {
       // Try to divide the current data bit.
-      if (crc & 0x8000) {
+      if ((crc & 0x8000) == 0x8000) {
         crc = (crc << 1) ^ 0x1021;
       } else {
         crc = crc << 1;
@@ -97,8 +97,10 @@ uint16_t get_checksum(unsigned char *packet, unsigned int nBytes){
     }
   }
 
-  uint16_t flipped = (crc>>8) | (crc<<8);
-  return flipped;
+  // uint16_t flipped = (crc>>8) | (crc<<8);
+  // return flipped;
+
+  return crc; // writing should be first the higher byte, then lower
 }
 
 // clamp the input variable to +-limit
@@ -427,10 +429,10 @@ void Signed_Duty_Motors(int dutycycle1, int dutycycle2)
     cmd[4] = dc2_x[1];
     cmd[5] = dc2_x[0];
     unsigned int crc = get_checksum(cmd, 6);
-    unsigned char byte1 = crc>>8; //High byte
-    unsigned char byte0 = crc; //Low byte
-    cmd[6] = byte0;
-    cmd[7] = byte1;
+    unsigned char hi = (crc >> 8) & 0xFF; //High byte
+    unsigned char lo = crc & 0xFF; //Low byte
+    cmd[6] = hi;
+    cmd[7] = lo;
 
     device.write((const char*)&cmd, 8);
 
@@ -478,10 +480,10 @@ void Signed_Speed_M(int motor,int vel)
     cmd[5] = Qs_x[0];
 
     unsigned int crc = get_checksum(cmd, 6);
-    unsigned char byte1 = crc>>8; //High byte
-    unsigned char byte0 = crc; //Low byte
-    cmd[6] = byte0;
-    cmd[7] = byte1;
+    unsigned char hi = (crc >> 8) & 0xFF; //High byte
+    unsigned char lo = crc & 0xFF; //Low byte
+    cmd[6] = hi;
+    cmd[7] = lo;
 
     device.write((const char*)&cmd, 8);
 }
@@ -525,11 +527,10 @@ void SignedSpeed_MIX(int QspeedM1,int QspeedM2)
     cmd[9] = Qs_x2[0];
 
     unsigned int crc = get_checksum(cmd, 10);
-    unsigned char byte1 = crc>>8; //High byte
-    unsigned char byte0 = crc; //Low byte
-    cmd[10] = byte0;
-    cmd[11] = byte1;
-
+    unsigned char hi = (crc >> 8) & 0xFF; //High byte
+    unsigned char lo = crc & 0xFF; //Low byte
+    cmd[10] = hi;
+    cmd[11] = lo;
 
     device.write((const char*)&cmd, 12);
 }
@@ -677,10 +678,10 @@ void set_QPID1(int motor)
     cmd[17] = Qs_x[0];
 
     unsigned int crc = get_checksum(cmd, 18);
-    unsigned char byte1 = crc>>8; //High byte
-    unsigned char byte0 = crc; //Low byte
-    cmd[18] = byte0;
-    cmd[19] = byte1;
+    unsigned char hi = (crc >> 8) & 0xFF; //High byte
+    unsigned char lo = crc & 0xFF; //Low byte
+    cmd[18] = hi;
+    cmd[19] = lo;
 
     device.write((const char*)&cmd, 20);
 }
