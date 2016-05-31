@@ -46,7 +46,7 @@ int right_motor_sign_ =1;
 
 
 cereal::CerealPort device;
-char reply[REPLY_SIZE];
+unsigned char reply[REPLY_SIZE];
 const float cereal_timeout=0.1;
 
 
@@ -132,17 +132,24 @@ void write_to_roboclaw_2(unsigned char command)
 void write_to_roboclaw(unsigned char command, unsigned char bytevalue)
 {
     unsigned char address = g_roboclaw_address;
-    unsigned char checksum = (address + command + bytevalue) & 0x7F;
+    // unsigned char checksum = (address + command + bytevalue) & 0x7F;
 
-    unsigned char cmd[4];
+    unsigned char cmd[5];
 
     cmd[0] = address;
     cmd[1] = command;
     cmd[2] = bytevalue;
-    cmd[3] = checksum;
+    unsigned int crc = get_checksum(cmd, 3);
+    unsigned char hi = (crc >> 8) & 0xFF; //High byte
+    unsigned char lo = crc & 0xFF; //Low byte
+    cmd[3] = hi;
+    cmd[4] = lo;
 
-    device.write((const char*)&cmd, 4);
+    device.write((const char*)&cmd, 5);
 
+    // cmd[3] = checksum;
+
+    // device.write((const char*)&cmd, 4);
 }
 
 // Setting S3 as emergency stop
@@ -216,7 +223,7 @@ int Read_Quadrature_M(int motor)
         write_to_roboclaw_2(command);
 
         try {
-            device.read(reply, 6, cereal_timeout);
+	  device.read((char*)reply, 7, cereal_timeout);
         } catch(cereal::TimeoutException& e) {
             ROS_ERROR("Read_Quadrature_M: Timeout while reading!");
             device.flush();
@@ -225,9 +232,27 @@ int Read_Quadrature_M(int motor)
         }
 
         checksum_from_roboclaw = (g_roboclaw_address + command + ((unsigned char)(reply[0])) + ((unsigned char)(reply[1])) + ((unsigned char)(reply[2])) + ((unsigned char)(reply[3])) + ((unsigned char)(reply[4])) ) & 0x7F;
+        unsigned char data_to_check[20];
+        data_to_check[0] = g_roboclaw_address;
+        data_to_check[1] = command;
+        data_to_check[2] = reply[0];
+        data_to_check[3] = reply[1];
+        data_to_check[4] = reply[2];
+        data_to_check[5] = reply[3];
+        data_to_check[6] = reply[4];
 
+	//std::cout << "reply quadr = 0x" << std::hex << reply[0] << reply[1] << reply[2] << reply[3] << reply[4] << std::dec << std::endl;
 
-        if (true)// (checksum_from_roboclaw == (unsigned char)(reply[5]))
+        uint16_t crc = get_checksum(data_to_check, 7);
+
+        uint16_t crc_from_reply = reply[5];
+	crc_from_reply = crc_from_reply << 8 + reply[6];
+
+        
+	std::cout << "crc =0x" << std::hex << crc << std::dec << " crc_from_reply= 0x" << std::hex << crc_from_reply << std::endl;
+	
+
+        if (crc == crc_from_reply)
           {
             break;
           } else if (i == (num_retries - 1)) {
@@ -292,15 +317,19 @@ void reset_counts()
 
     address = 128;
     command = 20;
-    checksum = (address + command + bytevalue) & 0x7F;
 
-    unsigned char cmd[3];
+    unsigned char cmd[4];
 
     cmd[0] = address;
     cmd[1] = command;
-    cmd[2] = checksum;
 
-    device.write((const char*)&cmd, 3);
+    unsigned int crc = get_checksum(cmd, 2);
+    unsigned char hi = (crc >> 8) & 0xFF; //High byte
+    unsigned char lo = crc & 0xFF; //Low byte
+    cmd[2] = hi;
+    cmd[3] = lo;
+
+    device.write((const char*)&cmd, 4);
 }
 
 
@@ -321,24 +350,35 @@ int  Read_Speed_M(int motor)
     }
 
     bytevalue= 0;
-    checksum = (address+command+bytevalue) & 0x7F;
+
+    unsigned char cmd[5];
+
+    cmd[0] = address;
+    cmd[1] = command;
+    cmd[2] = bytevalue;
+
+    unsigned int crc = get_checksum(cmd, 3);
+    unsigned char hi = (crc >> 8) & 0xFF; //High byte
+    unsigned char lo = crc & 0xFF; //Low byte
+    cmd[3] = hi;
+    cmd[4] = lo;
+
+    device.write((const char*)&cmd, 5);
+
+
+    // checksum = (address+command+bytevalue) & 0x7F;
 
     //  printf ("address: %d \n", address);
     //  printf ("command: %d \n", command);
     //  printf ("bytevalue: %d \n", bytevalue);
     //  printf ("checksum: %d \n", checksum);
 
-    unsigned char cmd[4];
+    // cmd[3] = checksum;
 
-    cmd[0] = address;
-    cmd[1] = command;
-    cmd[2] = bytevalue;
-    cmd[3] = checksum;
-
-    device.write((const char*)&cmd, 4);
+    // device.write((const char*)&cmd, 4);
 
 
-    try{ device.read(reply, 6, cereal_timeout); }
+    try{ device.read((char*)reply, 7, cereal_timeout); }
     catch(cereal::TimeoutException& e)
     {
 
@@ -349,10 +389,10 @@ int  Read_Speed_M(int motor)
 
 
     if (motor == 1) {
-        checksum_send_roboclow= (128+18+((unsigned char)(reply[0]))+((unsigned char)(reply[1]))+ ((unsigned char)(reply[2]))+((unsigned char)(reply[3]))+((unsigned char)(reply[4])))& 0x7F;
+      checksum_send_roboclow = get_checksum(reply, 5);
     }
     else {
-        checksum_send_roboclow= (128+19+((unsigned char)(reply[0]))+((unsigned char)(reply[1]))+ ((unsigned char)(reply[2]))+((unsigned char)(reply[3]))+((unsigned char)(reply[4])))& 0x7F;
+        checksum_send_roboclow=get_checksum(reply, 5);
     }
 
 
@@ -562,7 +602,7 @@ qpid_s read_qpid(int motor)
     device.write((const char*)&cmd, 2);
 
 
-    try{ device.read(reply, 17, cereal_timeout); }
+    try{ device.read((char*)reply, 18, cereal_timeout); }
     catch(cereal::TimeoutException& e)
     {
 

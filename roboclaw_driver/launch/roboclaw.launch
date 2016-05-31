@@ -6,7 +6,7 @@
   <group unless="$(arg tortugabot_version)">
       <node pkg="roboclaw_driver" type="roboclaw_driver" name="tortugabot_roboclaw" output="screen">
           <param name="serial_port" value="/dev/ttyACM0"/>
-          <param name="baudrate" value="1000000"/>
+          <param name="baudrate" value="115200"/>
           <param name="roboclaw_address" value="128"/>
 
           <param name="odom_frame" value="odom"/>
@@ -28,7 +28,7 @@
   <group if="$(arg tortugabot_version)">
       <node pkg="roboclaw_driver" type="roboclaw_driver" name="tortugabot_roboclaw" output="screen">
           <param name="serial_port" value="/dev/ttyACM0"/>
-          <param name="baudrate" value="1000000"/>
+          <param name="baudrate" value="115200"/>
           <param name="roboclaw_address" value="128"/>
 
           <param name="odom_frame" value="odom"/>
