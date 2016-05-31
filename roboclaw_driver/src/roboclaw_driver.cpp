@@ -80,11 +80,15 @@ typedef struct qpid_s_tag {
 
 //Get the checksum as calculated in the RoboClaw manual
 //Calculates CRC16 of nBytes of data in byte array message
-unsigned int get_checksum(unsigned char *packet, unsigned int nBytes){
-  unsigned int crc;
+uint16_t get_checksum(unsigned char *packet, unsigned int nBytes){
+  uint16_t crc;
+  // Perform modulo-2 division, a byte at a time.
   for (int byte = 0; byte < nBytes; byte++) {
-    crc = crc ^ ((unsigned int)packet[byte] << 8);
+    // Bring the next byte into the remainder.
+    crc = crc ^ ((uint16_t)packet[byte] << 8);
+    // Perform modulo-2 division, a bit at a time.
     for (unsigned char bit = 0; bit < 8; bit++) {
+      // Try to divide the current data bit.
       if (crc & 0x8000) {
         crc = (crc << 1) ^ 0x1021;
       } else {
@@ -92,10 +96,12 @@ unsigned int get_checksum(unsigned char *packet, unsigned int nBytes){
       }
     }
   }
-  return crc;
+
+  uint16_t flipped = (crc>>8) | (crc<<8);
+  return flipped;
 }
 
-//clamp the input variable to +-limit
+// clamp the input variable to +-limit
 int clamp_value(int input, int limit)
 {
     if (input > limit) {
