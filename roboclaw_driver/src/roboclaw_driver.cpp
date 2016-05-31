@@ -79,19 +79,20 @@ typedef struct qpid_s_tag {
 } qpid_s;
 
 //Get the checksum as calculated in the RoboClaw manual
-unsigned char get_checksum(unsigned char *data, unsigned int length){
-    unsigned char checksum = 0;
-
-    unsigned int i = 0;
-
-    for (i=0; i < length; ++i) {
-        checksum += data[i];
+//Calculates CRC16 of nBytes of data in byte array message
+unsigned int get_checksum(unsigned char *packet, unsigned int nBytes){
+  unsigned int crc;
+  for (int byte = 0; byte < nBytes; byte++) {
+    crc = crc ^ ((unsigned int)packet[byte] << 8);
+    for (unsigned char bit = 0; bit < 8; bit++) {
+      if (crc & 0x8000) {
+        crc = (crc << 1) ^ 0x1021;
+      } else {
+        crc = crc << 1;
+      }
     }
-
-    checksum &= 0x7f;
-
-    return(checksum);
-
+  }
+  return crc;
 }
 
 //clamp the input variable to +-limit
@@ -218,15 +219,15 @@ int Read_Quadrature_M(int motor)
         checksum_from_roboclaw = (g_roboclaw_address + command + ((unsigned char)(reply[0])) + ((unsigned char)(reply[1])) + ((unsigned char)(reply[2])) + ((unsigned char)(reply[3])) + ((unsigned char)(reply[4])) ) & 0x7F;
 
 
-        if (checksum_from_roboclaw == (unsigned char)(reply[5])) {
+        if (true)// (checksum_from_roboclaw == (unsigned char)(reply[5]))
+          {
             break;
-        } else if (i == (num_retries - 1)) {
+          } else if (i == (num_retries - 1)) {
             //time to give up
             ROS_ERROR("Could not read encoder %d correctly. Returning old data. Odom will suffer a bit.", motor);
             gave_up_on_read = 1;
             device.flush();
             break;
-           
         } else {
             //Still retrying
             //try clearing the serial port buffer
@@ -412,17 +413,20 @@ void Signed_Duty_Motors(int dutycycle1, int dutycycle2)
     dc1_x = reinterpret_cast<unsigned char *>(&dutycycle1);
     dc2_x = reinterpret_cast<unsigned char *>(&dutycycle2);
 
-    unsigned char cmd[7];
+    unsigned char cmd[8];
     cmd[0] = address;
     cmd[1] = command;
     cmd[2] = dc1_x[1];
     cmd[3] = dc1_x[0];
     cmd[4] = dc2_x[1];
     cmd[5] = dc2_x[0];
-    cmd[6] = get_checksum(cmd, 6);
+    unsigned int crc = get_checksum(cmd, 6);
+    unsigned char byte1 = crc>>8; //High byte
+    unsigned char byte0 = crc; //Low byte
+    cmd[6] = byte0;
+    cmd[7] = byte1;
 
-
-    device.write((const char*)&cmd, 7);
+    device.write((const char*)&cmd, 8);
 
     printf("dc1= %x %x dc2 = %x %x\n", dc1_x[1], dc1_x[0], dc2_x[1], dc2_x[0]);
 
@@ -456,7 +460,7 @@ void Signed_Speed_M(int motor,int vel)
     unsigned char *Qs_x;
     Qs_x = reinterpret_cast<unsigned char *>(&Q);
 
-    unsigned char cmd[7];
+    unsigned char cmd[8];
 
 
     cmd[0] = address;
@@ -467,11 +471,13 @@ void Signed_Speed_M(int motor,int vel)
     cmd[4] = Qs_x[1];
     cmd[5] = Qs_x[0];
 
-    cmd[6] = get_checksum(cmd, 6);
+    unsigned int crc = get_checksum(cmd, 6);
+    unsigned char byte1 = crc>>8; //High byte
+    unsigned char byte0 = crc; //Low byte
+    cmd[6] = byte0;
+    cmd[7] = byte1;
 
-    device.write((const char*)&cmd, 7);
-
-
+    device.write((const char*)&cmd, 8);
 }
 
 
@@ -497,7 +503,7 @@ void SignedSpeed_MIX(int QspeedM1,int QspeedM2)
     unsigned char *Qs_x2;
     Qs_x2 = reinterpret_cast<unsigned char *>(&Q2);
 
-    unsigned char cmd[11];
+    unsigned char cmd[12];
 
     cmd[0] = address;
     cmd[1] = command;
@@ -512,9 +518,14 @@ void SignedSpeed_MIX(int QspeedM1,int QspeedM2)
     cmd[8] = Qs_x2[1];
     cmd[9] = Qs_x2[0];
 
-    cmd[10] = get_checksum(cmd, 10);
+    unsigned int crc = get_checksum(cmd, 10);
+    unsigned char byte1 = crc>>8; //High byte
+    unsigned char byte0 = crc; //Low byte
+    cmd[10] = byte0;
+    cmd[11] = byte1;
 
-    device.write((const char*)&cmd, 11);
+
+    device.write((const char*)&cmd, 12);
 }
 
 
@@ -634,7 +645,7 @@ void set_QPID1(int motor)
     Ds_x = reinterpret_cast<unsigned char *>(&D);
 
 
-    unsigned char cmd[19];
+    unsigned char cmd[20];
     cmd[0] = address;
     cmd[1] = command;
 
@@ -659,10 +670,13 @@ void set_QPID1(int motor)
     cmd[16] = Qs_x[1];
     cmd[17] = Qs_x[0];
 
-    cmd[18] = get_checksum(cmd, 18);
+    unsigned int crc = get_checksum(cmd, 18);
+    unsigned char byte1 = crc>>8; //High byte
+    unsigned char byte0 = crc; //Low byte
+    cmd[18] = byte0;
+    cmd[19] = byte1;
 
-    device.write((const char*)&cmd, 19);
-
+    device.write((const char*)&cmd, 20);
 }
 
 
