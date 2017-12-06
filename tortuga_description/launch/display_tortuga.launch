@@ -1,11 +1,14 @@
 <?xml version="1.0"?>
 
 <launch>
+  <param
+    name="tf_prefix"
+    value="tortugabot1" />
   <arg
     name="model" />
   <arg
     name="gui"
-    default="True" />
+    default="False" />
   <arg name="urdf-name" default="tortuga_description.urdf.xacro"/>
   <arg name="urdf-path" value="$(find tortuga_description)/urdf/$(arg urdf-name)"/>
 

@@ -20,6 +20,7 @@ include_directories(
 
 add_executable(roboclaw_driver
   src/roboclaw_driver.cpp
+  src/suturo_roboclaw_driver.cpp
 )
 
 target_link_libraries(roboclaw_driver
