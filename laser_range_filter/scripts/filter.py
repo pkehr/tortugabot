@@ -60,7 +60,7 @@ class LaserRangeFilter:
 
         # starting from the marked areas, find their center point and cut
         # all the points in the cut_out_margin to the left and to the right
-        cut_out_margin = 50
+        cut_out_margin = 60
         for i in range(0, len(started_index)):
             center = int((ended_index[i] - started_index[i]) / 2.0 + started_index[i])
             # visualize
@@ -71,28 +71,6 @@ class LaserRangeFilter:
                 filtered_ranges[j] = marker
                 filtered_intensities[j] = 0
         
-        # inside_bad_range_flag = 0
-        # for i in range(margin, len(filtered_ranges) - margin):
-        #     if (filtered_ranges[i] == marker):
-        #         inside_bad_range_flag = margin
-        #         for j in range(i - margin, i - 1):
-        #             filtered_ranges[j] = marker
-        #             filtered_intensities[j] = 0
-        #     elif (inside_bad_range_flag > 0):
-        #         inside_bad_range_flag -= 1
-        #         filtered_ranges[i] = marker
-        #         filtered_intensities[i] = 0
-        # just cut out one margin to the back and one to the front
-        # for i in range(0, len(filtered_ranges)):
-        #     if (filtered_ranges[i] == marker):
-        #         inside_bad_range_flag = margin
-        #         for j in range(i - margin, i - 1):
-        #             filtered_ranges[j] = marker
-        #             filtered_intensities[j] = 0
-        #     elif (inside_bad_range_flag > 0):
-        #         inside_bad_range_flag -= 1
-        #         filtered_ranges[i] = marker
-        #         filtered_intensities[i] = 0
         scan_msg.ranges = filtered_ranges
         scan_msg.intensities = filtered_intensities
         self.pub.publish(scan_msg)
