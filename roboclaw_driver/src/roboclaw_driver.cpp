@@ -924,7 +924,7 @@ int main(int argc, char** argv)
     //Starting fresh, just in case
     device.flush();
 
-    ros::Subscriber cmd_vel_sub  = n.subscribe<geometry_msgs::Twist>("/cmd_vel", 3, cmdVelReceived);
+    ros::Subscriber cmd_vel_sub  = n.subscribe<geometry_msgs::Twist>("cmd_vel", 3, cmdVelReceived);
 
 
     //Initialize the roboclaw
