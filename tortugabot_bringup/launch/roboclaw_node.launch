@@ -2,18 +2,14 @@
 <launch>
 
     <arg name="dev" default="/dev/ttyACM0"/>
-    <arg name="baud" default="115200"/>
+    <arg name="baud" default="38400"/>
     <arg name="address" default="128"/>
     <arg name="max_speed" default="1.0"/>
     <arg name="ticks_per_meter" default="2495"/>
-    <!--arg name="ticks_per_meter" default="1181.35"/--> <!--For tortugabot1-->
-    
-    <arg name="base_width" default="0.357"/>
-    <!--arg name="base_width" default="0.339"/--> <!--For tortugabot1-->
+    <arg name="base_width" default="0.421"/>
     <arg name="run_diag" default="true"/>
 
-    <node if="$(arg run_diag)" pkg="roboclaw_node" type="roboclaw_node.py" name="roboclaw_node" output="screen">
-
+    <node if="$(arg run_diag)" pkg="roboclaw_node" type="roboclaw_node.py" name="roboclaw_node">
         <param name="~dev" value="$(arg dev)"/>
         <param name="~baud" value="$(arg baud)"/>
         <param name="~address" value="$(arg address)"/>

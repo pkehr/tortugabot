@@ -1,18 +1,26 @@
-<!--
-  Driver for the standard joystick (/dev/input/js0).
--->
+<!-- Driver for the standard joystick (/dev/input/js0). -->
 <launch>
+  <node pkg="joy" type="joy_node" name="joystrick_driver" output="screen" >
+    <param name="dev" type="string" value="/dev/input/js0" />
+    <param name="deadzone" value="0.12" />
+    <param name="autorepeat_rate" value="20" />
+    <param name="coalesce_interval" value="0.01" />
+  </node>
+
   <!--  smooths inputs from cmd_vel_mux/input/teleop_raw to cmd_vel_mux/input/teleop -->
   <!--include file="$(find turtlebot_teleop)/launch/includes/velocity_smoother.launch.xml"/-->
 
-  <node pkg="turtlebot_teleop" type="turtlebot_teleop_joy" name="turtlebot_teleop_joystick">
-    <param name="scale_angular" value="1.5"/>
-    <param name="scale_linear" value="0.6"/>
-    <param name="axis_deadman" value="10"/>
-    <!--remap from="turtlebot_teleop_joystick/cmd_vel" to="teleop_velocity_smoother/raw_cmd_vel"/-->
-    <remap from="turtlebot_teleop_joystick/cmd_vel" to="/cmd_vel"/>
+  <!--- Teleop Joystick, taken from iai_boxy node -->
+  <node pkg="turtlebot_teleop" type="turtlebot_teleop_joy" name="turtlebot_teleop_joystick" respawn="true">
+    <param name="scale_angular" value="1.2"/>
+    <param name="scale_linear" value="1.0"/>
+    <param name="axis_deadman" value="4"/>
+    <param name="axis_headctrl" value="8"/>
+    <param name="axis_linear_x" value="4"/>
+    <param name="axis_linear_y" value="3"/>
+    <param name="axis_angular" value="0"/>
+    <param name="axis_head_pan" value="1"/>
+    <param name="axis_head_tilt" value="2"/>
+    <remap from="/cmd_vel" to="/base/cmd_vel"/>
   </node>
-
-  <node pkg="joy" type="joy_node" name="joystick"/>
-
 </launch>

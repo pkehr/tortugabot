@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <launch>
-  <node name="laser_driver" pkg="urg_node" type="urg_node" args="_ip_address:=192.168.102.74">
+  <node name="laser_driver" pkg="urg_node" type="urg_node" args="_ip_address:=192.168.102.75">
     <remap from="scan" to="scan_raw" />
     <remap from="camera_depth_frame" to="laser" />
   </node>
