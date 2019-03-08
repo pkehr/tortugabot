@@ -12,9 +12,6 @@
   <depend>openni2_launch</depend>
   <depend>nodelet</depend>
 
-  <!-- ekf.launch -->
-  <depend>robot_pose_ekf</depend>
-
   <!-- joy_teleop.launch -->
   <depend>joy</depend>
 
@@ -23,6 +20,7 @@
 
   <!-- minimal.launch -->
   <depend>tf</depend>
+  <depend>gmapping</depend>
 </package>
 
 
