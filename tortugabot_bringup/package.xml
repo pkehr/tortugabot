@@ -11,6 +11,7 @@
   <!-- 3dsensor.launch -->
   <depend>openni2_launch</depend>
   <depend>nodelet</depend>
+  <depend>urg_node</depend>
 
   <!-- joy_teleop.launch -->
   <depend>joy</depend>
