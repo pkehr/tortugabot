@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <launch>
-  <arg name="map_file" default="$(find tortugabot_bringup)/maps/tab-1floor.yaml"/>
+  <arg name="map_file" default="$(find tortugabot_bringup)/maps/ms3_room_02.yaml"/>
   <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
 
   <arg name="use_map_topic"   default="false"/>
@@ -52,5 +52,6 @@
     <param name="initial_pose_y"            value="$(arg initial_pose_y)"/>
     <param name="initial_pose_a"            value="$(arg initial_pose_a)"/>
     <remap from="scan"                      to="$(arg scan_topic)"/>
+    <remap from="map"                      to="map"/>
   </node>
 </launch>

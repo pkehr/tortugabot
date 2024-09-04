@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <launch>
+<arg name="use_ns" default="false"/>
+
+<group ns="turtle" if="$(arg use_ns)">
   <include file="$(find tortugabot_bringup)/launch/base_and_joy.launch"/>
   <include file="$(find tortugabot_bringup)/launch/laser.launch"/>
+</group>
+
+  <include file="$(find tortugabot_bringup)/launch/base_and_joy.launch" unless="$(arg use_ns)"/>
+  <include file="$(find tortugabot_bringup)/launch/laser.launch" unless="$(arg use_ns)"/>
 </launch>

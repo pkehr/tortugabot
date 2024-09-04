@@ -1,0 +1,9 @@
+digraph G {
+"odom" -> "base_footprint"[label=" Broadcaster: /roboclaw_node\nAverage rate: 10.205\nBuffer length: 4.9\nMost recent transform: 1725464341.396\nOldest transform: 1725464336.496\n"];
+"map" -> "odom"[label=" Broadcaster: /amcl\nAverage rate: 27.804\nBuffer length: 4.927\nMost recent transform: 1725464341.452\nOldest transform: 1725464336.524\n"];
+"base_footprint" -> "laser"[label=" Broadcaster: /laser_on_plate_tf\nAverage rate: 10.191\nBuffer length: 4.907\nMost recent transform: 1725464341.531\nOldest transform: 1725464336.625\n"];
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 1725464341.4635248"[ shape=plaintext ] ;
+}->"map";
+}

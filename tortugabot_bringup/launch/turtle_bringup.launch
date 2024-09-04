@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+<arg name="use_ns" default="true"/>
+<arg name="start" default="true"/>
+<arg name="amcl" default="true"/>
+<arg name="move_base" default="true"/>
+
+<arg name="tf_prefix" default=""/>
+<group ns="turtle" if="$(arg use_ns)">
+
+  <group if="$(arg start)">
+  	<include file="$(find tortugabot_bringup)/launch/base_and_joy.launch" pass_all_args="true"/>
+  	<include file="$(find tortugabot_bringup)/launch/laser.launch" pass_all_args="true"/>
+  </group>
+  <group if="$(arg amcl)">
+  	<include file="$(find tortugabot_bringup)/launch/amcl_ns.launch" pass_all_args="true">
+  	</include>
+  </group>
+  
+    <group if="$(arg move_base)">
+  	<include file="$(find tortugabot_bringup)/launch/move_base.launch" pass_all_args="true"/>
+  </group>
+
+</group>
+
+<group unless="$(arg use_ns)">
+  <group if="$(arg start)">
+  	<include file="$(find tortugabot_bringup)/launch/base_and_joy.launch" pass_all_args="true"/>
+  	<include file="$(find tortugabot_bringup)/launch/laser.launch" pass_all_args="true"/>
+  </group>
+  <group if="$(arg amcl)">
+  	<include file="$(find tortugabot_bringup)/launch/amcl.launch" pass_all_args="true"/>
+  </group>
+  
+    <group if="$(arg move_base)">
+  	<include file="$(find tortugabot_bringup)/launch/move_base.launch" pass_all_args="true"/>
+  </group> 
+ </group>
+</launch>

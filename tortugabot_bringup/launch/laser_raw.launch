@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <launch>
-  <node name="laser_driver" pkg="urg_node" type="urg_node" args="_ip_address:=192.168.200.11">
+  <arg name="tf_prefix" default=""/>
+  <arg name="use_ns" default="false"/>
+  
+  <node name="laser_driver" pkg="urg_node" type="urg_node" args="_ip_address:=192.168.200.11" if="$(arg use_ns)">
+    <param name="frame_id" value="$(arg tf_prefix)/laser"/>
+    <remap from="scan" to="scan_raw" />
+    <remap from="camera_depth_frame" to="$(arg tf_prefix)/laser" />
+  </node>
+  
+  <node name="laser_driver" pkg="urg_node" type="urg_node" args="_ip_address:=192.168.200.11" unless="$(arg use_ns)">
     <remap from="scan" to="scan_raw" />
     <remap from="camera_depth_frame" to="laser" />
   </node>

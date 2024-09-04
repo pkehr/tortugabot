@@ -10,6 +10,7 @@
     <arg name="run_diag" default="true"/>
     <arg name="invert_motor_direction" default="false"/>
     <arg name="flip_left_and_right_motors" default="false"/>
+    <arg name="tf_prefix" default=""/>
 
     <node if="$(arg run_diag)" pkg="roboclaw_node" type="roboclaw_node.py" name="roboclaw_node">
         <param name="~dev" value="$(arg dev)"/>
@@ -20,6 +21,9 @@
         <param name="~base_width" value="$(arg base_width)"/>
         <param name="~invert_motor_direction" value="$(arg invert_motor_direction)"/>
         <param name="~flip_left_and_right_motors" value="$(arg flip_left_and_right_motors)"/>
+        <param name="~turtle_tf_prefix" value="$(arg tf_prefix)"/>
+        
+        <remap from="odom" to="$(arg tf_prefix)/odom"/>
     </node>
 
     <node pkg="diagnostic_aggregator" type="aggregator_node"
