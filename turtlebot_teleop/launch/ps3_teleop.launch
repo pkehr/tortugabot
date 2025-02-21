@@ -11,7 +11,6 @@
     <param name="axis_angular" value="0"/>
     <param name="axis_head_pan" value="2"/>
     <param name="axis_head_tilt" value="2"/>
-    <remap from="/cmd_vel" to="/base/cmd_vel"/>
   </node>
 
   <!--node pkg="joy" type="joy_node" name="joystick"/-->
