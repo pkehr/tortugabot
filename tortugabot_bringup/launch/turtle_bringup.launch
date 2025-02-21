@@ -10,7 +10,7 @@
 
   <group if="$(arg start)">
   	<include file="$(find tortugabot_bringup)/launch/base_and_joy.launch" pass_all_args="true"/>
-  	<include file="$(find tortugabot_bringup)/launch/laser.launch" pass_all_args="true"/>
+  	<include file="$(find tortugabot_bringup)/launch/laser_ns.launch" pass_all_args="true"/>
   </group>
   <group if="$(arg amcl)">
   	<include file="$(find tortugabot_bringup)/launch/amcl_ns.launch" pass_all_args="true">
@@ -18,7 +18,7 @@
   </group>
   
     <group if="$(arg move_base)">
-  	<include file="$(find tortugabot_bringup)/launch/move_base.launch" pass_all_args="true"/>
+  	<include file="$(find tortugabot_bringup)/launch/move_base_ns.launch" pass_all_args="true"/>
   </group>
 
 </group>

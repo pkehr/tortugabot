@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+  
+  <arg name="tf_prefix" default=""/>
+  
+  <include file="$(find tortugabot_bringup)/launch/launch_standard/laser_raw.launch" pass_all_args="true"/>
+  
+  <node name="laser_filter" pkg="laser_range_filter" type="filter.py"/>
+
+  <node name="laser_on_plate_tf" pkg="tf" type="static_transform_publisher"
+        args="0.05 0 0.36 0 0 0 base_footprint laser 100"/>
+</launch>

@@ -1,0 +1,6 @@
+<launch>
+<arg name="tf_prefix" default=""/>
+<arg name="use_ns" default="false"/>
+  <include file="$(find tortugabot_bringup)/launch/launch_standard/roboclaw_node.launch" pass_all_args="true"/>
+  <include file="$(find tortugabot_bringup)/launch/launch_standard/joy_teleop.launch" pass_all_args="true"/>
+</launch>

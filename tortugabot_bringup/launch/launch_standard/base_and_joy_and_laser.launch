@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+  <include file="$(find tortugabot_bringup)/launch/launch_standard/base_and_joy.launch"/>
+  <include file="$(find tortugabot_bringup)/launch/launch_standard/laser.launch"/>
+</launch>
