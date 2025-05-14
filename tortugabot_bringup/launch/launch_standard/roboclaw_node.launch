@@ -9,7 +9,7 @@
     <arg name="base_width" default="0.421"/>
     <arg name="run_diag" default="true"/>
     <arg name="invert_motor_direction" default="false"/>
-    <arg name="flip_left_and_right_motors" default="true"/>
+    <arg name="flip_left_and_right_motors" default="false"/>
     <arg name="tf_prefix" default=""/>
 
     <node if="$(arg run_diag)" pkg="roboclaw_node" type="roboclaw_node.py" name="roboclaw_node">
